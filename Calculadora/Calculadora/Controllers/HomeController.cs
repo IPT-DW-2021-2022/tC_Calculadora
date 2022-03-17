@@ -27,9 +27,12 @@ namespace Calculadora.Controllers {
 
 
       [HttpPost]  // mas, esta anotação já é obrigatória, para o método 'escutar' o HTTP POST
-      public IActionResult Index(string botao, string visor) {
-
-         int i = 0;
+      public IActionResult Index(
+         string botao,
+         string visor,
+         string operador,
+         string operando,
+         string limpaVisor) {
 
 
          switch (botao) {
@@ -44,12 +47,20 @@ namespace Calculadora.Controllers {
             case "8":
             case "9":
                // atribuir ao VISOR o algarismo selecionado
-               if (visor != "0") visor = visor + botao;
+               if (limpaVisor != "sim" && visor != "0") visor = visor + botao;
                else { visor = botao; }
+               // indica q o visor já não precisa de ser limpo
+               limpaVisor = "nao";
                break;
             case ",":
                // transforma o num inteiro em real
-               if (!visor.Contains(',')) visor += ",";
+               if (limpaVisor == "sim") {
+                  visor = "0,";
+                  limpaVisor = "nao";
+               }
+               else {
+                  if (!visor.Contains(',')) visor += ",";
+               }
                break;
             case "+/-":
                //  inverte o valor do visor
@@ -57,14 +68,44 @@ namespace Calculadora.Controllers {
                else visor = "-" + visor;
                // poderíamos executar esta mesma operação de forma algébrica
                break;
-           
+            case "+":
+            case "-":
+            case "x":
+            case ":":
+               // processar as tarefas associadas aos operadores
+               if (!string.IsNullOrEmpty(operando)) {
+                  // 2ª, 3ª, etc. escolha de operador
+                  // agora temos mesmo de fazer as contas
+                  double primeiroOperando = Convert.ToDouble(operando);
+                  double segundoOperando = Convert.ToDouble(visor);
+                  switch (operador) {
+                     case "+":
+                        visor = Convert.ToString(primeiroOperando + segundoOperando);
+                        break;
+                     case "-":
+                        visor = (primeiroOperando - segundoOperando).ToString();
+                        break;
+                     case "x":
+                        visor = primeiroOperando * segundoOperando + "";
+                        break;
+                     case ":":
+                        visor = primeiroOperando / segundoOperando + "";
+                        break;
+                  }
+               }
+               // guardar os dados para a px. iteração
+               operador = botao;
+               operando = visor;
+               limpaVisor = "sim";
 
-
+               break;
          }
 
          // preparar dados a serem enviados para a View
          ViewBag.Visor = visor;
-
+         ViewBag.Operando = operando;
+         ViewBag.Operador = operador;
+         ViewBag.LimpaVisor = limpaVisor;
 
          return View();
       }
