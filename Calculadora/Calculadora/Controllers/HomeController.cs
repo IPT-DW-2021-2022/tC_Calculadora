@@ -29,6 +29,9 @@ namespace Calculadora.Controllers {
       [HttpPost]  // mas, esta anotação já é obrigatória, para o método 'escutar' o HTTP POST
       public IActionResult Index(string botao, string visor) {
 
+         int i = 0;
+
+
          switch (botao) {
             case "0":
             case "1":
@@ -43,11 +46,19 @@ namespace Calculadora.Controllers {
                // atribuir ao VISOR o algarismo selecionado
                if (visor != "0") visor = visor + botao;
                else { visor = botao; }
-
-
-
-
                break;
+            case ",":
+               // transforma o num inteiro em real
+               if (!visor.Contains(',')) visor += ",";
+               break;
+            case "+/-":
+               //  inverte o valor do visor
+               if (visor.StartsWith('-')) visor = visor.Substring(1);
+               else visor = "-" + visor;
+               // poderíamos executar esta mesma operação de forma algébrica
+               break;
+           
+
 
          }
 
